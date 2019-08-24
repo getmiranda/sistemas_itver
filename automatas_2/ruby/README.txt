@@ -1,0 +1,18 @@
+MATERIA: LENGUAJES Y AUTÓMATAS II
+DOCENTE: LIC. MARTHA MARTINEZ MORENO
+
+LENGUAJE DE PROGRAMACION:
+	* JAVA
+
+DESCRIPCIÓN: Compilador del lenguaje de programación Ruby 
+desarollado en JavaCC. Incluye instalador, manual de usuario y
+y la gamatica original del lenguaje en BNF.
+
+INCLUYE:
+	* GUI: DESARROLLADO EN NETBEANS
+	* INSTALADOR
+	* SOURCE: .JJ
+	* DOCUMENTACIÓN
+
+NOTA: ESTE PROYECTO SE REALIZÓ EN COLABORACION CON 
+VILMA ZORINA CAMACHO CÁGAL

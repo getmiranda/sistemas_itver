@@ -1,0 +1,785 @@
+options {
+
+}
+
+PARSER_BEGIN( MCVillCompiler )
+	
+	package interfaz;
+
+	//Librerias
+	import java.io.IOException;
+	import java.util.ArrayList;
+
+	//Clase que ejecuta el parser
+	public class MCVillCompiler {
+
+		private static FileManager file = new FileManager();
+		private static FileManager file2 = new FileManager();
+		private static FileManager file3 = new FileManager();
+		private static IOManager iom = new IOManager(file, file2, file3);;
+		private static SemanticManager sm = new SemanticManager();;
+		private static ArrayList<Token> listValues = new ArrayList<Token>();
+		private static boolean band = true;
+
+		public static void main( String[] MCVillArgs ) {
+
+			//Declaracion del analizador léxico
+			MCVillCompiler lex;
+			
+
+			//Si el usuario escribe en la consola
+			if ( MCVillArgs.length == 0 ) {
+				System.out.println( "MCVill:> Leyendo de entrada estandar...\n" );
+				lex = new MCVillCompiler( System.in );
+			}
+
+			//Si el usuario le pasa un archivo para analizar
+			else if ( MCVillArgs.length == 1 ) {
+				System.out.println( "MCVill:> Leyendo de fichero " + MCVillArgs[0] + " ...\n" );
+
+				try {
+					lex = new MCVillCompiler( new java.io.FileInputStream( MCVillArgs[0] ) );
+				} catch( java.io.FileNotFoundException e ) {
+					System.out.println( "MCVill:> El fichero " + MCVillArgs[0] + " no ha sido encontrado." );
+					return;
+				}
+			}
+
+			//Si el usuario no sabe usarlo
+			else {
+				System.out.println ("MCVill:> Debes utilizarlo de una de las siguientes formas:");
+				System.out.println ("         java MCVill < fichero");
+				System.out.println ("Or");
+				System.out.println ("         java MCVill fichero");
+				return;
+			}
+
+			//Ejecucion del Analizador
+			try{
+				file.crearFile("out\\MCVill_lexical_Output.txt");
+				file2.crearFile("out\\MCVill_Syntax_Output.txt");
+				file3.crearFile("out\\MCVill_Semantic_Output.txt");
+				lex.start();
+				System.out.println( "\nMCVill:> La entrada ha sido leida con exito.");
+				file.cerrarFile();
+				file2.cerrarFile();
+				file3.cerrarFile();
+			}
+
+			catch(TokenMgrError e){
+				System.out.println( "\nMCVill:> Ha ocurrido un error lexico.");
+				System.out.println( "Detalles: " + e.getMessage());
+			}
+			catch(ParseException pe){
+				iom.errorSyntax(pe);
+			}
+		}
+	}
+
+PARSER_END(MCVillCompiler)
+
+//*****************************************************LEXICAL***************************************************************
+
+//IGNORAR
+SKIP : {
+	   " "
+	|  "\t"
+	|  "\r"
+	|  <"rem" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+}
+
+//COMENTARIOS
+SKIP : {
+	  "=begin" : COMENTARIO
+	| "#" : COMENTARIO
+}
+<COMENTARIO> SKIP : {
+	"=end" : DEFAULT
+	| "\n" : DEFAULT
+}
+<COMENTARIO> MORE : {
+	<~[]>
+}
+
+//SIMBOLOGIA
+TOKEN[IGNORE_CASE]:{
+
+	  <PR_ALIAS:"alias"> 						{ IOManager.showMessage(image, "PALABRA RESERVADA"); } 
+	| <PR_AND:"and"> 							{ IOManager.showMessage(image, "Palabra reservada and "); } 
+	| <PR_BREAK:"break"> 						{ IOManager.showMessage(image, "Palabra reservada break "); } 
+	| <PR_CASE:"case"> 							{ IOManager.showMessage(image, "Palabra reservada case "); } 
+	| <PR_CLASS:"class"> 						{ IOManager.showMessage(image, "Palabra reservada class "); } 
+	| <PR_DEF:"def"> 							{ IOManager.showMessage(image, "Palabra reservada def "); } 
+	| <PR_DEFINED:"defined"> 					{ IOManager.showMessage(image, "Palabra reservada defined "); } 
+	| <PR_DO:"do"> 								{ IOManager.showMessage(image, "Palabra reservada do "); } 
+	| <PR_ELSE:"else"> 							{ IOManager.showMessage(image, "Palabra reservada else "); } 
+	| <PR_ELSIF:"elsif"> 						{ IOManager.showMessage(image, "Palabra reservada elsif"); } 
+	| <PR_END:"end"> 							{ IOManager.showMessage(image, "Palabra reservada end "); } 
+	| <PR_ENSURE:"ensure"> 						{ IOManager.showMessage(image, "Palabra reservada ensure "); } 
+	| <PR_FALSE:"false"> 						{ IOManager.showMessage(image, "Palabra reservada false "); } 
+	| <PR_TRUE:"true"> 							{ IOManager.showMessage(image, "Palabra reservada true "); } 
+	| <PR_FOR:"for"> 							{ IOManager.showMessage(image, "Palabra reservada for "); } 
+	| <PR_IF:"if"> 								{ IOManager.showMessage(image, "Palabra reservada if "); } 
+	| <PR_IN:"in"> 								{ IOManager.showMessage(image, "Palabra reservada in "); } 
+	| <PR_MODULE:"module"> 						{ IOManager.showMessage(image, "Palabra reservada module "); } 
+	| <PR_NEXT:"next"> 							{ IOManager.showMessage(image, "Palabra reservada next "); } 
+	| <PR_NIL:"nil"> 							{ IOManager.showMessage(image, "Palabra reservada nil "); } 
+	| <PR_NOT:"not"> 							{ IOManager.showMessage(image, "Palabra reservada not "); } 
+	| <PR_OR:"or"> 								{ IOManager.showMessage(image, "Palabra reservada or "); } 
+	| <PR_REDO:"redo"> 							{ IOManager.showMessage(image, "Palabra reservada redo "); } 
+	| <PR_RESCUE:"rescue"> 						{ IOManager.showMessage(image, "Palabra reservada rescue "); } 
+	| <PR_RETRY:"retry"> 						{ IOManager.showMessage(image, "Palabra reservada retry "); } 
+	| <PR_RETURN:"return"> 						{ IOManager.showMessage(image, "Palabra reservada return "); } 
+	| <PR_SELF:"self"> 							{ IOManager.showMessage(image, "Palabra reservada self "); } 
+	| <PR_SUPER:"super"> 						{ IOManager.showMessage(image, "Palabra reservada super "); } 
+	| <PR_THEN:"then"> 							{ IOManager.showMessage(image, "Palabra reservada then "); } 
+	| <PR_UNDEF:"undef"> 						{ IOManager.showMessage(image, "Palabra reservada undef "); } 
+	| <PR_UNLESS:"unless"> 						{ IOManager.showMessage(image, "Palabra reservada unless "); } 
+	| <PR_UNTIL:"until"> 						{ IOManager.showMessage(image, "Palabra reservada until "); } 
+	| <PR_WHEN:"when"> 							{ IOManager.showMessage(image, "Palabra reservada when "); } 
+	| <PR_WHILE:"while"> 						{ IOManager.showMessage(image, "Palabra reservada while "); } 
+	| <PR_YIELD:"yield"> 						{ IOManager.showMessage(image, "Palabra reservada yield "); } 
+	| <PR_FILE:"_FILE_">						{ IOManager.showMessage(image, "Palabra reservada _FILE_ "); } 
+	| <PR_LINE:"_LINE_"> 						{ IOManager.showMessage(image, "Palabra reservada _LINE_ "); } 
+	| <PR_PRINT:"print"> 						{ IOManager.showMessage(image, "Palabra reservada print "); } 
+	| <PR_PRINTF:"printf"> 						{ IOManager.showMessage(image, "Palabra reservada printf "); } 
+	| <PR_PUTS:"puts"> 							{ IOManager.showMessage(image, "Palabra reservada puts "); } 
+	| <PR_GETS:"gets"> 							{ IOManager.showMessage(image, "Palabra reservada gets "); } 
+	| <PR_CHOMP:"chomp"> 						{ IOManager.showMessage(image, "Palabra reservada chomp "); } 
+	| <PR_TO_I:"to_i"> 							{ IOManager.showMessage(image, "Palabra reservada parceo entero "); } 
+	| <PR_TO_S:"to_s"> 							{ IOManager.showMessage(image, "Palabra reservada parceo cadena "); } 
+	| <PR_TO_F:"to_f"> 							{ IOManager.showMessage(image, "Palabra reservada parceo flotante "); } 
+	| <PR_NEW:"new"> 							{ IOManager.showMessage(image, "Palabra reservada new "); } 
+	| <PR_P:"p"> 								{ IOManager.showMessage(image, "Palabra reservada p "); } 
+	| <PR_EACH:"each"> 							{ IOManager.showMessage(image, "Palabra reservada each "); } 
+    | <PR_EMPTY:"empty"> 						{ IOManager.showMessage(image, "Palabra reservada empty "); } 
+    | <PR_UPCASE:"upcase"> 						{ IOManager.showMessage(image, "Palabra reservada upcase "); } 
+    | <PR_INCLUDE:"include"> 					{ IOManager.showMessage(image, "Palabra reservada include "); }
+}
+
+//SIMBOLOS Y OPERADORES
+TOKEN:{
+
+	  <S_SUMA:"+"> 									{ IOManager.showMessage(image, "Simbolo Mas "); } 
+	| <S_MULTIPLICA:"*"> 							{ IOManager.showMessage(image, "Simbolo Multiplica "); } 
+  	| <S_LLAVE_A:"{"> 								{ IOManager.showMessage(image, "Simbolo llave abre  "); } 
+	| <S_LLAVE_C:"}"> 								{ IOManager.showMessage(image, "Simbolo llave cierra "); } 
+	| <S_PUNTO:"."> 								{ IOManager.showMessage(image, "Simbolo punto "); } 
+	| <S_CORCHETE_A:"["> 							{ IOManager.showMessage(image, "Simbolo corchete abre "); } 
+	| <S_CORCHETE_C:"]"> 							{ IOManager.showMessage(image, "Simbolo corchete cierra "); } 
+	| <S_PAREN_A:"("> 								{ IOManager.showMessage(image, "Simbolo parentesis abre "); } 
+	| <S_PAREN_C:")"> 								{ IOManager.showMessage(image, "Simbolo parentesis cierra "); } 
+	| <S_COMA:","> 									{ IOManager.showMessage(image, "Simbolo delimitador coma"); } 
+	| <S_PUNTO_COMA:";"> 							{ IOManager.showMessage(image, "Simbolo delimitador punto y coma "); } 
+	| <S_PUNTOS:":"> 								{ IOManager.showMessage(image, "Simbolo asignacion en case "); } 
+	| <S_BARRA:"|"> 								{ IOManager.showMessage(image, "Simbolo delimitador "); } 
+
+	| <OA_RESTA:"-"> 								{ IOManager.showMessage(image, "Simbolo resta "); } 
+	| <OA_DIVICION:"/"> 							{ IOManager.showMessage(image, "Simbolo divicion "); } 
+	| <OA_POTENCIA:"**"> 							{ IOManager.showMessage(image, "Simbolo potencia "); } 
+	| <OA_MOD_DIV:"%"> 								{ IOManager.showMessage(image, "Simbolo modulo de divicion "); } 
+
+	| <OC_IGUAL_QUE:"=="> 							{ IOManager.showMessage(image, "Simbolo igualdad "); } 
+	| <OC_DIFERENTE_DE:"!="> 						{ IOManager.showMessage(image, "Simbolo diferente de "); } 
+	| <OC_MENOR_QUE:"<"> 							{ IOManager.showMessage(image, "Simbolo Menor que "); } 
+	| <OC_MAYOR_QUE:">"> 							{ IOManager.showMessage(image, "Simbolo Mayor que "); } 
+	| <OC_MENOR_O_IGUAL:"<="> 						{ IOManager.showMessage(image, "Simbolo menor o igual "); } 
+	| <OC_MAYOR_O_IGUAL:">="> 						{ IOManager.showMessage(image, "Simbolo Maor o igual "); } 
+	| <OC_IGUALDAD_WHEN:"==="> 						{ IOManager.showMessage(image, "Simbolo igualdad sentencia when "); } 
+	| <OC_COMBINADO:"<=>"> 							{ IOManager.showMessage(image, "Simbolo comparador combinado "); } 
+	| <OC_QUESTION:"?"> 							{ IOManager.showMessage(image, "Simbolo pregunta "); } 
+
+	| <OAS_ASIGNA:"="> 								{ IOManager.showMessage(image, "Simbolo de asignacion "); } 
+	| <OAS_SUMA_ASIGNA:"+=">						{ IOManager.showMessage(image, "Simbolo de asignacion de suma "); } 
+	| <OAS_RESTA_ASIGNA:"-="> 						{ IOManager.showMessage(image, "Simbolo asignacion de resta "); } 
+	| <OAS_MULTIPLICACION_ASIGNA:"*=">				{ IOManager.showMessage(image, "Simbolo de asignacion de multiplicacion "); } 
+	| <OAS_DIVICION_ASIGNA:"/="> 					{ IOManager.showMessage(image, "Simbolo asignacion de divicion "); } 
+	| <OC_MODULO_ASIGNA:"%=">				    	{ IOManager.showMessage(image, "Simbolo asignacion de modulo de divicion "); } 
+	| <OC_POTENCIA_ASIGNA:"**=">					{ IOManager.showMessage(image, "Simbolo asignacion de potencia "); } 
+
+	| <ORA_RANGO:"..">						    	{ IOManager.showMessage(image, "Simbolo de rango "); } 
+	| <ORA_RANGO1:"...">							{ IOManager.showMessage(image, "Simbolo de Rango "); } 
+	| <OACC_CONSTANTES:"::">			    		{ IOManager.showMessage(image, "Simbolo acceso a constantes "); } 
+
+	| <OL_AND:"&&">									{ IOManager.showMessage(image, "Simbolo and "); } 
+	| <OL_OR:"||"> 									{ IOManager.showMessage(image, "Simbolo or "); } 
+	| <OL_NOT:"!">									{ IOManager.showMessage(image, "Simbolo not "); } 
+}
+
+//VALORES Y TIPOS
+TOKEN:{
+
+	  <VAL_CADENA: ( "\"")(~["\""])*("\"")> 									{ IOManager.showMessage(image, "Valor cadena"); } 
+	| <VAL_CADENA2: ("\'")(~["\'"])*("\'")> 									{ IOManager.showMessage(image, "Valor cadena"); } 
+	| <VAL_ENTERO: ("-")? (["0"-"9"])+> 										{ IOManager.showMessage(image, "Valor entero"); } 
+	| <VAL_DECIMAL: ("-")? (<VAL_ENTERO>)*(".")(<VAL_ENTERO>)+> 				{ IOManager.showMessage(image, "Valor decimal"); } 
+	| <ID_LOCAL: ("_")?(["a"-"z", "A"-"Z"])(["a"-"z", "A"-"Z","0"-"9", "_"])*> 	{ IOManager.showMessage(image, "ID local"); } 
+	| <ID_INSTANCE: ("@")(<ID_LOCAL>)+> 										{ IOManager.showMessage(image, "ID instancia"); } 
+	| <ID_CLASS: ("@@")(<ID_LOCAL>)+> 											{ IOManager.showMessage(image, "ID class"); } 
+	| <ID_GLOBAL: ("$")(<ID_LOCAL>)+> 											{ IOManager.showMessage(image, "ID global"); } 
+	| <ID_BLOCK: ("&")(<ID_LOCAL>)+> 											{ IOManager.showMessage(image, "ID block"); } 
+	| <ID_CONSTANT: (["A"-"Z"])+> 												{ IOManager.showMessage(image, "ID constante"); } 
+	| <S_SALTO: ("\n")+> 														{ }
+}
+
+
+//GRAMATICAS
+void start():{}{
+	program()
+}
+//************************************* PROGRAMA *************************************************
+void program():{}{
+	(
+	   LOOKAHEAD(5) stmt()
+	|  LOOKAHEAD(5) func()
+	|  LOOKAHEAD(5) estructuras()
+	|  LOOKAHEAD(5) clases()
+	|  opr()<S_SALTO>
+	)* 
+}
+//********************************* EXPRESIONES GENERALES *****************************************
+void opr():{}{
+	try {
+	(
+		  LOOKAHEAD(13)varname() op_arit() varname()
+		| LOOKAHEAD(3)valores() op_arit() valores()
+		| LOOKAHEAD(13)varname() op_arit() valores()
+		| LOOKAHEAD(2)valores() op_arit() varname()
+
+		| LOOKAHEAD(10)varname() op_asigna() varname()
+	    | LOOKAHEAD(10)varname() op_asigna() valores()
+	
+
+		| LOOKAHEAD(13)varname() op_logicos() varname() 
+		| LOOKAHEAD(3)valores() op_logicos() valores()
+		| LOOKAHEAD(13)varname() op_logicos() valores()
+		| LOOKAHEAD(2)valores() op_logicos() varname()
+		
+		| LOOKAHEAD(13)varname() op_compara() varname() 
+		| LOOKAHEAD(3)valores() op_compara() valores()
+		| LOOKAHEAD(13)varname() op_compara() valores()
+		| LOOKAHEAD(2)valores() op_compara() varname()
+
+		| LOOKAHEAD(13)varname() op_rango() varname()
+		| LOOKAHEAD(3)valores() op_rango() valores()
+		| LOOKAHEAD(13)varname() op_rango() valores()
+		| LOOKAHEAD(3)valores() op_rango()  varname()
+	)
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+
+	
+	}
+
+}
+//************************************* STMT  *************************************************
+void stmt():{}{
+	(
+		LOOKAHEAD(5) declara() 
+	|   LOOKAHEAD(5) imprimir() 
+	|   LOOKAHEAD(5) accArregos() 
+	|   LOOKAHEAD(5) parsear()
+	| 	llamadaMetodos() 
+	)
+}
+
+//************************************* DECLARACIONES ***************************************
+void declara(): {
+	Token id;
+	String type = null;
+	int line = 0;
+}
+{
+	try {
+
+		( id = varname()
+			<OAS_ASIGNA> 
+			( 
+
+				   LOOKAHEAD(5) rangos()   <S_SALTO>
+				 | LOOKAHEAD(5) arreglos() <S_SALTO>
+				 | LOOKAHEAD(5) lectura()  <S_SALTO>
+				 | LOOKAHEAD(5) parsear()
+				 |  valor()	<S_SALTO>		{ for( int i = 0; i < listValues.size(); i++ ) 
+											  {
+												for (int j = 0; j < listValues.size(); j++ ) 
+												{
+													type = sm.compareTypes( listValues.get( i ), listValues.get( j ) );
+												}
+											  }
+											  sm.addVariable( id, type );
+											  listValues.clear();
+			                                }
+       
+		
+                                
+			) 
+		)	{listValues.clear();}
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while ( t.kind != MCVillCompilerTokenManager.EOF);
+	}
+	catch (SemanticException se){
+		iom.errorSemantic(se);
+		Token t;
+		do {
+			t = getNextToken();
+		} while ( t.kind != MCVillCompilerTokenManager.EOF );
+	}
+
+}
+
+
+//************************************** VALORES ********************************************
+void valor()throws SemanticException:{}
+{
+	( 
+		expr() 
+		(op_arit() expr())*
+	)
+}
+
+//**************************************** EXPRESIONES ***************************************
+
+void expr():{ 
+	Token id;
+}
+{
+	try{
+			( 													                             
+				  id = <ID_LOCAL>			{ 
+			  								  sm.checkVariable( id );
+			  								  listValues.add( id ); 
+											}  
+				| id = <VAL_ENTERO>			{ listValues.add( id ); }
+				| id = <VAL_CADENA>			{ listValues.add( id ); }
+				| id = <VAL_DECIMAL>		{ listValues.add( id ); }
+				| id = <VAL_CADENA2>		{ listValues.add( id ); }
+				| "(" valor() ")"
+			)
+		}
+		catch (ParseException e) {
+			iom.errorSyntax(e);
+		}
+		catch (SemanticException se){
+			iom.errorSemantic(se);
+		}
+	
+}
+
+
+//**************************************** OPERADORES  **************************************
+void op_arit():{}{
+("-" | "+" | "*" | "/" | "%" | "**" )
+}
+
+void op_logicos():{}{
+("&&" |"||" |"!" )
+}
+
+void op_rango():{}{
+	(".." | "...")
+}
+
+void op_compara():{}{
+	("==" |"!=" |"<" |">" |">=" |"<=" |"<=>" |"?" |"===")
+}
+
+void op_asigna():{}{
+	("+=" |"-=" |"*=" |"/=" |"**=" |"%=")
+}
+
+//**************************************** VARIABLES ****************************************
+Token varname():{
+	Token id;
+}
+{
+	( 	  
+		  LOOKAHEAD(5) id = <ID_LOCAL>
+		| LOOKAHEAD(5) id = <ID_CONSTANT> 
+		| LOOKAHEAD(5) id = <ID_GLOBAL> 
+		| LOOKAHEAD(5) id = <ID_CLASS> 
+		| id = <ID_INSTANCE> 
+	)
+	{ return id; }
+}
+
+//************************************** VALORES ********************************************
+void valores():{}{
+	( <VAL_ENTERO> 
+	| <VAL_DECIMAL> 
+	| <VAL_CADENA> 
+	| <VAL_CADENA2> 
+	| <ID_LOCAL> 
+	| <PR_TRUE> 
+	| <PR_FALSE>
+	
+	) 
+}
+
+//**************************************** CONTENIDO RANGOS *********************************
+void rangos():{}{
+	try {
+			(
+			LOOKAHEAD(3)varname() ("..."|"..") varname()
+			|valores() ("..."|"..") valores()
+			)
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+		declara();
+	}
+	
+}
+
+//************************************ CONTENIDO ARREGLOS ***********************************
+void arreglos():{}{
+	try {
+		( <S_CORCHETE_A> valores() (<S_COMA> valores())* <S_CORCHETE_C> )
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+
+	}
+	
+}
+
+//********************************* CONTENIDO LECTURAS **************************************
+//("." (<PR_CHOMP> | "."( <PR_TO_I> |  <PR_TO_F>|  <PR_TO_S>)))*
+void lectura():{}{
+	try {
+			varname()"."<PR_GETS> (LOOKAHEAD(5)"." <PR_CHOMP>( "." (<PR_TO_I> | <PR_TO_F>))?| "." (<PR_TO_I> | <PR_TO_F>))?
+
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+	}	
+}
+
+//**************************************** PARSEO DE VARIABLES ***********************************************
+void parsear():{}{
+	try {
+			( varname()"."puntosPalabras() <S_SALTO> )
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+	stmt();
+	}
+	
+}
+
+//**************************************** PUNTOS + PALABRAS RESERVADAS ***************************************
+void puntosPalabras():{}{
+try {
+	(
+			  LOOKAHEAD(8)<PR_CLASS>
+			| LOOKAHEAD(8)<PR_TO_S>
+			| LOOKAHEAD(8)<PR_TO_F>
+			| LOOKAHEAD(8)<PR_TO_I>
+			| LOOKAHEAD(8)<PR_NEW>
+			| LOOKAHEAD(8)<PR_EACH> <PR_DO> 
+			| (LOOKAHEAD(3)<PR_EMPTY> | <PR_INCLUDE> | <PR_UPCASE>)(LOOKAHEAD(2)("?"|"!"))?
+	) 
+		
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+	parsear();
+	}	
+}
+
+//********************************** IMPRESIONES -PUTS -PRINT -P ********************************************
+void imprimir():{}{
+	try {
+	( 
+	( LOOKAHEAD(4)<PR_PUTS>|LOOKAHEAD(4)<PR_PRINT>|LOOKAHEAD(4)<PR_PRINTF>|<PR_P> ) 
+		(
+		  LOOKAHEAD(2) valores() <S_SALTO>
+		| LOOKAHEAD(2) varname() <S_SALTO>
+		| parsear() 
+		)
+	)
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+	stmt();
+	}
+
+}
+
+//************************************ ACCESO ARREGLOS ****************************************************
+
+void accArregos():{}{
+	try {
+	( varname() "[" (LOOKAHEAD(2)varname() | valores()) "]" <S_SALTO> )
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+	stmt();
+	}
+}
+
+//********************************* LLAMADA A METODOS ***************************************************
+void llamadaMetodos():{}{
+	try {
+	( varname() "(" (LOOKAHEAD(2)varname() | valores()) (<S_COMA> (LOOKAHEAD(2)varname() | valores()))* ")" <S_SALTO> )
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+	stmt();
+	}
+}
+
+//********************************* FUNCIONES *********************************************************
+
+void func():{}{
+	try {
+	( metodos() )
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+		func();
+	}
+}
+
+//********************************* METODOS **********************************************************
+
+void metodos():{}{
+	try {
+	( 
+		<PR_DEF> (<PR_SELF> ".")? varname() 
+		(("(")? varname() ("," (varname()| ("*")(<ID_LOCAL>) | ("**")(<ID_LOCAL>) ))* (")")? )? <S_SALTO>
+		
+		program()
+		<PR_END> <S_SALTO>
+	)
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+	func();
+	}
+}
+
+//********************************* ESTRUCTURAS *******************************************
+void estructuras():{}{
+	try {
+	( 
+		( 
+		  LOOKAHEAD(5) esIf() 
+		| LOOKAHEAD(5) esUnless() 
+		| LOOKAHEAD(5) esWhile()
+		| LOOKAHEAD(5) esUntil() 
+		| esFor() 
+		//| esEach() 
+		
+		)
+	 )
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+		program();
+	}
+}
+
+
+//********************************* IF *******************************************
+void esIf():{}{
+	try {
+	( 
+		( 
+          <PR_IF> varname() op_compara() (LOOKAHEAD(2)varname()|valores()) <S_SALTO> 
+          	program()
+          	(esElsif())?
+          	<PR_END><S_SALTO>
+	    )
+	)
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF & t.image != "\n");
+		estructuras();
+		}
+}
+
+//****************************************** ELSIF ********************************************************
+void esElsif():{}{
+	try {
+	( 
+		( 
+          <PR_ELSIF> varname() op_compara() (LOOKAHEAD(2)varname()|valores()) <S_SALTO> 
+          	program()
+          	
+	    )
+	)
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+	}
+}
+//****************************************** UNLESS ********************************************************
+void esUnless():{}{
+	try {
+	( 
+		( 
+          <PR_UNLESS> varname() op_compara() (LOOKAHEAD(2)varname()|valores()) <S_SALTO> 
+          	program()
+          	<PR_END><S_SALTO>
+          
+	    )
+	)
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+	estructuras();
+	}
+}
+//****************************************** WHILE ********************************************************
+void esWhile():{}{
+	try {
+	( 
+		( 
+          <PR_WHILE> opr() <S_SALTO> 
+          	program()
+          	<PR_END><S_SALTO>
+          
+	    )
+	)
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+	estructuras();
+	}
+}
+
+
+//****************************************** UNTIL  ********************************************************
+void esUntil():{}{
+	try {
+	( 
+		( 
+          <PR_UNTIL> opr() <S_SALTO> 
+          	program()
+          	<PR_END><S_SALTO>
+          
+	    )
+	)
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+	estructuras();
+	}
+}
+
+//****************************************** FOR  **********************************************************
+void esFor():{}{
+	try {
+	( 
+		( 
+          <PR_FOR> opr() <S_SALTO> 
+          	program()
+          	<PR_END><S_SALTO>
+          
+	    )
+	)
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+	estructuras();
+	}
+}
+
+//********************************* CLASES *****************************************************************
+
+void clases():{}{
+	try {
+	( 
+		<PR_CLASS> varname() ("<" varname())? <S_SALTO>
+		program()
+		<PR_END><S_SALTO>
+	)
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind == MCVillCompilerTokenManager.EOF);
+	clases();
+	}
+}

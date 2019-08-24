@@ -1,0 +1,5 @@
+yacc -d Sintactico.y
+
+lex Lexico.l
+
+gcc lex.yy.c Sintactico.tab.c -oEJECUTABLE

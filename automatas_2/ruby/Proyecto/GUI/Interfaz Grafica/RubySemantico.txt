@@ -1,0 +1,6 @@
+
+MCVill:> Ha ocurrido un error semantico.
+Detalles:
+	La variable "mensaje" ya ha sido declarada 
+	con un tipo de dato diferente.
+Linea: 200

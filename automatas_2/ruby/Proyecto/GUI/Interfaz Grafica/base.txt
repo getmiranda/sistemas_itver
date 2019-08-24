@@ -1,0 +1,202 @@
+class MyClass
+  def initialize
+    puts 'Creando instancia'
+     a= a.upcase?
+  argumento.to_i
+ puts a
+ p argumento
+print 2 
+printf argumento.to_i
+  end
+end
+instance = MyClass.new
+puts instance.class
+flotante = 4.6
+lista = [4, 8, 2010]
+lista[2]
+def otro_metodo(argumento, *argumentos)
+  p argumento
+  p argumentos
+  texto = 'Cadena de texto'
+texto = "Cadena de texto"
+until j < 0
+  puts j
+  j -= 1
+  if valor == 2
+  puts 'Los valores son iguales'
+elsif valor > 4
+  puts 'El valor es mayor a 4'
+end
+end
+end
+otro_metodo('Texto', 20, true, 2.5)
+diccionario['llave']
+rangos = 0...50
+verdadero = 12
+falso = 34
+#Definicion de metodos en Ruby-----------------------------------------------------------
+def mi_metodo
+  mensaje = 'El resultado es: '
+  #resultado = 2 + 2
+  #mensaje + resultado.to_s
+end
+puts mi_metodo
+#Parametros regulares, nombrados y variables en Ruby--------------------------------------
+def mi_metodo(argumento)
+#= 'default')
+ a= a.gets.chomp.to_i
+  p argumento
+  p argumento.class
+  p argumento.upcase
+end
+def otro_metodo(argumento, *argumentos)
+  p argumento
+  p argumentos
+  texto = 'Cadena de texto'
+texto = "Cadena de texto"
+until j < 0
+  puts j
+  j -= 1
+  if valor == 2
+  puts 'Los valores son iguales'
+elsif valor > 4
+  puts 'El valor es mayor a 4'
+end
+end
+end
+otro_metodo('Texto', 20, true, 2.5)
+#Control de flujos con if y unless---------------------------------------------------------
+valor = 1
+if valor == 2
+  puts 'Los valores son iguales'
+elsif valor > 4
+  puts 'El valor es mayor a 4'
+end
+unless valor >= 2
+  puts 'Es menor a 2'
+end
+#puts 'Es 1' if valor == 1
+#puts 'No es 1' unless valor == 1
+#Ciclos y bucles en Ruby--------------------------------------------------------------------
+i = 0
+while i < 10
+  puts i
+  i += 1
+  puts otra_cadena.empty?
+puts otra_cadena.to_i
+puts otra_cadena.include? 
+p "La suma de 2 + 8 es #{2+8}"
+end
+puts 'Until'
+j = 10
+until j < 0
+  puts j
+  j -= 1
+  if valor == 2
+  puts 'Los valores son iguales'
+elsif valor > 4
+  puts 'El valor es mayor a 4'
+end
+end
+#paises.each do |pais|
+ #puts pais 
+#end
+#Interpolacion de cadenas----------------------------------------------------------------------
+cadena = 'clase String'
+otra_cadena = "La cadena es #{cadena}"
+puts otra_cadena.empty?
+puts otra_cadena.to_i
+puts otra_cadena.include? 
+p "La suma de 2 + 8 es #{2+8}"
+#Clases en Ruby-------------------------------------------------------------------------------
+class MyClass
+  def initialize
+    puts 'Creando instancia'
+     a= a.upcase?
+  argumento.to_i
+ puts a
+ p argumento
+print 2 
+printf argumento.to_i
+  end
+end
+instance = MyClass.new
+puts instance.class
+#Herencia---------------------------------------------------------------------------------
+class Human < Object
+  def initialize(name)
+  name = 23
+  end
+  def talk(message)
+    puts "#{@name}: #{message}"
+  end
+  def self.description
+  puts  'Clase Human para representar a un humano.'
+  end
+end
+def mi_metodo(argumento)
+#= 'default')
+ a= a.gets.chomp.to_i
+  p argumento
+  p argumento.class
+  p argumento.upcase
+end
+def otro_metodo(argumento, *argumentos)
+  p argumento
+  p argumentos
+  texto = 'Cadena de texto'
+texto = "Cadena de texto"
+until j < 0
+  puts j
+  j -= 1
+  if valor == 2
+  puts 'Los valores son iguales'
+elsif valor > 4
+  puts 'El valor es mayor a 4'
+end
+end
+end
+otro_metodo('Texto', 20, true, 2.5)
+#Control de flujos con if y unless---------------------------------------------------------
+valor = 1
+if valor == 2
+  puts 'Los valores son iguales'
+elsif valor > 4
+  puts 'El valor es mayor a 4'
+end
+unless valor >= 2
+  puts 'Es menor a 2'
+end
+puts 'Creando instancia'
+     a= a.upcase?
+  argumento.to_i
+ puts a
+ if valor == 2
+  puts 'Los valores son iguales'
+elsif valor > 4
+  puts 'El valor es mayor a 4'
+end
+ p argumento
+print 2 
+printf argumento.to_i
+class Human < Object
+  def initialize(name)
+  end
+  def talk(message)
+    puts "#{@name}: #{message}"
+  end
+  def self.description
+  puts  'Clase Human para representar a un humano.'
+  end
+end
+miranda = "hola"
+#Definicion de metodos en Ruby-----------------------------------------------------------
+def mi_metodo
+  mensaje = 'El resultado es: '
+  #resultado = 2 + 2
+  #mensaje + resultado.to_s
+end
+puts mi_metodo
+mensaje = 1234
+�
+

@@ -1,0 +1,12 @@
+1. Dirigirse a la ruta donde estan los archivos
+   Ejemplo: cd C:\Compiladores\ETU
+
+2. Metacompilar el archivo .jj
+   javacc ETU.jj
+
+3. Compilar todos los archivos .java
+   javac *.java
+
+4. Ejecutar el analizador, hay dos maneras:
+   a) java ETU Ejemplo_Codigo.txt
+   b) java ETU [ENTER]

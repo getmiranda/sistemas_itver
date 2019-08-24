@@ -1,0 +1,11 @@
+C/C++ -> Directorios de inclusiones adicionales:	
+$(MSMPI_INC);$(MSMPI_INC)\x64
+$(MSMPI_INC);$(MSMPI_INC)\x86
+
+Vinculador -> Todas las opciones -> Directirios de biliotecas adicionales			
+$(MSMPI_LIB64)
+$(MSMPI_LIB32)
+ 	
+
+Vinculador -> Todas las opciones -> Dependencias adicionales
+msmpi.lib

@@ -1,0 +1,14 @@
+
+MCVill:> Ha ocurrido un error sintactico.
+Detalles:
+	Encountered " <ID_LOCAL> "MyClass "" at line 6, column 7.
+Was expecting:
+    "=" ...
+    
+
+MCVill:> Ha ocurrido un error sintactico.
+Detalles:
+	Encountered " <ID_LOCAL> "MyClass "" at line 6, column 7.
+Was expecting:
+    <S_SALTO> ...
+    

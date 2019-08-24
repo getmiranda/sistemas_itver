@@ -1,0 +1,514 @@
+PARSER_BEGIN(REG)
+
+	//	Clase que implementa el parser
+	public class REG 
+	{
+		//	Variables de clase
+		private static REG compiler;
+		private static boolean band = true;
+
+		//	Método principal
+		public static void main( String[] REGArgs ) throws ParseException
+		{
+			//	Si el usuario escribe por consola
+			if ( REGArgs.length == 0 ) {
+				System.out.println( "\nConsola>> Escriba c\u00F3digo...\n\t" );
+				compiler = new REG( System.in );
+				startAnalyser();
+			}
+
+			//	Si el usuario pasa un archivo para analizar
+			if ( REGArgs.length == 1 ) {
+				System.out.println( "\nConsola>> Leyendo del archivo " + REGArgs[0] + " ...\n\t" );
+
+				try {
+					compiler = new REG( new java.io.FileInputStream( REGArgs[0] ) );
+					startAnalyser();
+				} 
+				catch( java.io.FileNotFoundException e ) {
+					System.out.println( "Consola>> El fichero " + REGArgs[0] + " no ha sido encontrado." );
+				}
+			}
+		}
+
+		private static void startAnalyser() throws ParseException {
+			//try{
+				compiler.start();
+				System.out.println( "\nANALISIS SINT\u00C1CTICO TERMINADO." );
+				/*
+			}
+			catch(ParseException pe){
+				System.out.println("Hubo un error sintactico general: \n\t" + pe.getMessage());
+				/*
+				Token t = getToken(0);
+				while(t.image != ";" || t.kind != REGTokenManager.EOF){
+					t = getNextToken();
+				}
+
+
+				Token t;
+				do {
+					t = getNextToken();
+				} while ( t.kind != REGTokenManager.EOF || t.image != ";");
+
+			}*/
+		}
+
+		public static void showMessage(StringBuilder t, String msj) {
+			
+			if (band) {
+			 	//System.out.printf("\t%-20s %s\n\n", "LEXEMA", "TOKEN");
+			 	band = false;
+			}
+			//System.out.printf("\t%-20s %s\n", t, msj);
+		}
+	}
+
+PARSER_END(REG)
+
+//	Lexemas que va a ignorar el analizador léxico.
+SKIP:{
+
+	  " "
+	| "\t"
+	| "\n"
+	| "\r"
+}
+
+//	Comentarios multilinea
+SKIP : {
+	  "/*" : DentroComentario2
+}
+<DentroComentario2> MORE : {
+	<~[]>
+}
+<DentroComentario2> SKIP:{
+	  "*/" : DEFAULT
+}
+
+//	Palabras Reservadas
+TOKEN[IGNORE_CASE] : {
+
+	  <PR_PROGRAMA: "programa">			{ REG.showMessage( image, "PALABRA_RESERVADA_PROGRAMA" ); }
+	| <PR_PUBLIC: "public">				{ REG.showMessage( image, "PALABRA_RESERVADA_PUBLIC" ); }
+	| <PR_MAIN: "main">					{ REG.showMessage( image, "PALABRA_RESERVADA_MAIN" ); }
+	| <PR_IF: "if">						{ REG.showMessage( image, "PALABRA_RESERVADA_IF" ); }
+	| <PR_FOR: "for">					{ REG.showMessage( image, "PALABRA_RESERVADA_FOR" ); }
+	| <PR_WHILE: "while">				{ REG.showMessage( image, "PALABRA_RESERVADA_WHILE" ); }
+	| <PR_ELSE: "else">					{ REG.showMessage( image, "PALABRA_RESERVADA_ELSE" ); }
+	| <PR_PRINTLN: "println">			{ REG.showMessage( image, "PALABRA_RESERVADA_PRINTLN" ); }
+	| <PR_READLN: "readln">				{ REG.showMessage( image, "PALABRA_RESERVADA_READLN" ); }
+	| <PR_DO: "do">						{ REG.showMessage( image, "PALABRA_RESERVADA_DO" ); }
+	| <PR_RETURN: "return">				{ REG.showMessage( image, "PALABRA_RESERVADA_RETURN" ); }
+	| <PR_SWITCH: "switch">				{ REG.showMessage( image, "PALABRA_RESERVADA_SWITCH" ); }
+	| <PR_CASE: "case">					{ REG.showMessage( image, "PALABRA_RESERVADA_CASE" ); }
+	| <PR_BREAK: "break">				{ REG.showMessage( image, "PALABRA_RESERVADA_BREAK" ); }
+
+}
+
+//	Delimitadores
+TOKEN : {
+
+	  <DEL_PUNTO_COMA: ";">				{ REG.showMessage( image, "DELIMITADOR_PUNTO_COMA" ); }
+	| <DEL_LLAVE_ABRE: "{">				{ REG.showMessage( image, "DELIMITADOR_LLAVE_ABRE" ); }
+	| <DEL_LLAVE_CIERRA: "}">			{ REG.showMessage( image, "DELIMITADOR_LLAVE_CIERRA" ); }
+	| <DEL_PARENTESIS_ABRE: "(">		{ REG.showMessage( image, "DELIMITADOR_PARENTESIS_ABRE" ); }
+	| <DEL_PARENTESIS_CIERRA: ")">		{ REG.showMessage( image, "DELIMITADOR_PARENTESIS_CIERRA" ); }
+	| <DEL_COMA: ",">					{ REG.showMessage( image, "DELIMITADOR_COMA" ); }
+	| <DEL_DOSPUNTOS: ":">				{ REG.showMessage( image, "DELIMITADOR_DOSPUNTOS" ); }
+	| <DEL_GATO : "#">
+	| <DEL_QUE : "¿">
+	| <DEL_QUEE : "?">					
+
+}
+
+//	Operadores
+TOKEN : {
+
+	  <OP_ADD: "+">						{ REG.showMessage( image, "OPERADOR_ADD" ); }
+	| <OP_SUB: "-">						{ REG.showMessage( image, "OPERADOR_SUB" ); }
+	| <OP_MUL: "*">						{ REG.showMessage( image, "OPERADOR_MUL" ); }
+	| <OP_DIV: "/">						{ REG.showMessage( image, "OPERADOR_DIV" ); }
+	| <OP_MOD: "%">						{ REG.showMessage( image, "OPERADOR_MOD" ); }
+	| <OP_ASIG: "=">					{ REG.showMessage( image, "OPERADOR_ASIG" ); }
+	| <OP_PESO: "$">					{ REG.showMessage( image, "OPERADOR_PESO" ); }
+
+	| <OP_POT: "^">						{ REG.showMessage( image, "OPERADOR_POT" ); }
+	| <OP_MENOR: "<">					{ REG.showMessage( image, "OPERADOR_MENOR" ); }
+	| <OP_MAYOR: ">">					{ REG.showMessage( image, "OPERADOR_MAYOR" ); }
+	| <OP_MENOR_IGUAL: "<=">			{ REG.showMessage( image, "OPERADOR_MENOR_IGUAL" ); }
+	| <OP_MAYOR_IGUAL: ">=">			{ REG.showMessage( image, "OPERADOR_MAYOR_IGUAL" ); }
+	| <OP_IGUAL: "==">					{ REG.showMessage( image, "OPERADOR_IGUAL" ); }
+	| <OP_DIF: "!=">					{ REG.showMessage( image, "OPERADOR_DIF" ); }
+
+	| <OP_AND: "&&">					{ REG.showMessage( image, "OPERADOR_AND" ); }
+	| <OP_OR: "||">						{ REG.showMessage( image, "OPERADOR_OR" ); }
+	| <OP_NEG: "!">						{ REG.showMessage( image, "OPERADOR_NEG" ); }
+
+	| <OP_INC: "++">					{ REG.showMessage( image, "OPERADOR_INC" ); }
+	| <OP_DEC: "--">					{ REG.showMessage( image, "OPERADOR_DEC" ); }
+
+}
+
+//	Tipos
+TOKEN : {
+
+	  <T_STRING: "string">				{ REG.showMessage( image, "TIPO_STRING" ); }
+	| <T_INT: "int">					{ REG.showMessage( image, "TIPO_INT" ); }
+	| <T_FLOAT: "float">				{ REG.showMessage( image, "TIPO_FLOAT" ); }
+	| <T_BOOLEAN: "boolean">			{ REG.showMessage( image, "TIPO_BOOLEAN" ); }
+
+}
+
+//	Valores 
+TOKEN : {
+
+	  <VAL_STRING: ( "\"")(~["\""])*("\"")>									{ REG.showMessage( image, "VALOR_STRING" ); }
+	| <VAL_INT: ("-")? (["0"-"9"])+>										{ REG.showMessage( image, "VALOR_INTEGER" ); }
+	| <VAL_FLOAT: ("-")? (<VAL_INT>)*(".")(<VAL_INT>)+>						{ REG.showMessage( image, "VALOR_FLOAT" ); }
+	| <VAL_BOOLEAN: ("true" | "false")>										{ REG.showMessage( image, "VALOR_BOOLEAN" ); }
+	| <ID: (["a"-"z", "A"-"Z"])(["a"-"z", "A"-"Z","0"-"9", "_", "$"])*>		{ REG.showMessage( image, "IDENTIFICADOR" ); }
+	
+}
+
+//	Caracteres no validos
+TOKEN : {
+	<NO_VALIDO: ~[]>														{ REG.showMessage( image, "*CARACTER NO VALIDO*\n"); }
+}
+
+//	Declaracion gramaticas
+void start() : {} 
+{
+	try{
+		(
+			<PR_PROGRAMA> nombre() "{" instruccion() "}" <EOF>
+		)
+	}
+		
+	catch(ParseException pe){
+		System.out.println("\t} o ;  \n");
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.kind != REGTokenManager.EOF);
+	}
+
+}
+
+void nombre() : {} 
+{
+	(
+		"$" <ID>
+	)
+}
+
+void instruccion() : {} 
+{
+	(
+		  declaracion()
+		| condicional()
+		| ciclo()
+		| io()
+		| actualizacion2()
+	)*
+}
+
+void declaracion() : {} 
+{
+	try{
+		(
+			  LOOKAHEAD(5)declaracion_ni()
+		 	| LOOKAHEAD(5)declaracion_i()
+		)
+	}
+		
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico declaracion: \n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != ")" || t.image != ";" || t.image != "}");
+	}
+}
+
+
+void declaracion_ni() : {} 
+{
+	try{
+		(
+			tipo() nombre() ";"
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico declaracion no inicializada: \n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != ")" || t.image != ";" || t.image != "}");
+	}	
+}
+
+void declaracion_i() : {} 
+{
+	try{
+		(
+			tipo() nombre() <OP_ASIG> valor() ";"
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico declaracion inicializada: \n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != ")" || t.image != ";" || t.image != "}");
+	}
+	
+}
+
+void tipo() : {} 
+{
+	(
+		  <T_STRING>
+		| <T_INT>
+		| <T_BOOLEAN>
+		| <T_FLOAT>
+	)
+}
+
+void valor() : {} 
+{
+	try{
+		(
+			  <VAL_STRING>
+			| <VAL_BOOLEAN>
+			| expresion()
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico valor invalido: \nDetalles:\n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != ")" || t.image != ";" || t.image != "}");
+	}
+}
+
+void expresion() : {} 
+{
+
+	(
+		  LOOKAHEAD(3)termino() "+" expresion() 
+	 	| LOOKAHEAD(3)termino() "-" expresion() 
+	 	| LOOKAHEAD(3)termino()
+	)
+
+}
+
+void termino() : {} 
+{
+	(     
+		   LOOKAHEAD(3)factor() "*" termino()
+		 | LOOKAHEAD(3)factor() "/" termino()
+		 | LOOKAHEAD(3)factor()
+	)
+}
+
+void factor() : {} 
+{
+	try{
+		(
+			  "(" expresion() ")"
+		  	|  nombre()
+		  	| <VAL_INT>
+		  	| <VAL_FLOAT>
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico en la expresion aritmetica: \nDetalles:\n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != ")" || t.image != ";" || t.image != "}");
+	}
+}
+
+void condicional() : {} 
+{
+	try{
+		(
+			  LOOKAHEAD(11)pif()
+			| LOOKAHEAD(11)pif_else()
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico en sentencias condicionales: \nDetalles:\n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != "}");
+	}
+}
+
+void pif() : {} 
+{
+	try{
+		(
+			<PR_IF> "#" condicion() "#" "{" instruccion() "}" 
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("Hubo un error sintactico sentencia if: \n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while ( t.image != "}");
+		condicional();
+	}
+
+	
+}
+
+void pif_else() : {} 
+{
+	try{
+		(
+			<PR_IF> "(" condicion() ")" "{" instruccion() "}" <PR_ELSE> "{" instruccion() "}" 
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("Hubo un error sintactico sentencia if-else: \n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while ( t.image != "}");
+		condicional();
+	}
+}
+
+void condicion() : {} 
+{
+	try{
+		(
+			  expresion() op_log() expresion()
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico en condicion: \nDetalles:\n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != ")");
+	}
+}
+
+void op_log() : {} 
+{
+	(
+		  "<"
+		| "<="
+		| ">="
+		| ">"
+		| "=="
+	)
+}
+
+void ciclo() : {} 
+{
+	try{
+		(
+			  pwhile()
+			| pdo_while()
+			| pfor()
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico en ciclos: \nDetalles:\n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != "}" || t.image != ";");
+	}
+
+
+}
+
+void pwhile() : {} 
+{
+	try{
+		(
+			  <PR_WHILE> "(" condicion() ")" "{" instruccion() "}" 
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico en while: \nDetalles:\n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != "}");
+	}
+}
+
+void pdo_while() : {} 
+{
+	try{
+		(
+			  <PR_DO> "¿" instruccion() "?" <PR_WHILE> "(" condicion() ")" ";"
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sint\u00E1ctico en do-while: \nDetalles:\n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != ";");
+	}
+
+}
+
+void pfor() : {} 
+{
+	(
+		<PR_FOR>  "(" declaracion_i() ";"condicion()";" actualizacion() ")" "{" instruccion() "}" 
+		 
+	)
+}
+
+void actualizacion() : {} 
+{
+	(
+		  LOOKAHEAD(2)nombre() <OP_INC>
+		| LOOKAHEAD(2)nombre() <OP_DEC>
+		 
+	)
+}
+
+void actualizacion2() : {} 
+{
+	(
+		  LOOKAHEAD(3)nombre() <OP_INC> ";"
+		| LOOKAHEAD(3)nombre() <OP_DEC> ";"
+	)
+}
+
+void io() : {} 
+{
+	(
+		   imprimir()
+		 | leer()
+	)
+}
+
+void imprimir() : {} 
+{
+	(
+		  LOOKAHEAD(7)<PR_PRINTLN> "(" <VAL_STRING> "+" nombre() ")" ";"
+		| LOOKAHEAD(7)<PR_PRINTLN> "(" <VAL_STRING> ")" ";"
+	)
+}
+
+void leer() : {} 
+{
+	(
+		<PR_READLN> "(" tipo() "," nombre() ")" ";"
+	)
+}

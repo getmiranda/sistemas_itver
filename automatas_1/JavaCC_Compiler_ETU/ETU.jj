@@ -1,0 +1,503 @@
+options {
+  JAVA_UNICODE_ESCAPE = true;
+  ERROR_REPORTING = false;
+  STATIC = false;
+  COMMON_TOKEN_ACTION = false;
+  //TOKEN_FACTORY = "MyToken";
+  //JDK_VERSION = "1.5";
+}
+PARSER_BEGIN(ETU)
+
+	//	Clase que implementa el parser
+	public class ETU 
+	{
+		//	Variables de clase
+		private static ETU compiler;
+		private static boolean band = true;
+
+		//	Método principal
+		public static void main( String[] ETUArgs ){
+			//	Si el usuario escribe por consola
+			if ( ETUArgs.length == 0 ) {
+				System.out.println( "\nConsola>> Escriba c\u00F3digo...\n\t" );
+				compiler = new ETU( System.in );
+			}else if(ETUArgs.length == 1){
+				System.out.println( "\nConsola>> Leyendo del archivo " + ETUArgs[0] + " ...\n\t" );
+				try{
+					compiler = new ETU( new java.io.FileInputStream( ETUArgs[0] ) );
+				} catch(java.io.FileNotFoundException e){
+					System.out.println( "Consola>> El fichero " + ETUArgs[0] + " no ha sido encontrado." );
+					return;
+				}
+			} else {
+				System.out.println("Consola>>   El uso es uno de:");
+     			System.out.println("         java ETU < inputfile");
+      			System.out.println("O");
+      			System.out.println("         java ETU archivo");
+      			return;
+			}
+
+			try{
+				compiler.start();
+				System.out.println( "\nANALISIS SINT\u00C1CTICO TERMINADO." );
+			} catch(ParseException e){
+				System.out.println(e.getMessage());
+      			System.out.println("Consola>>  Se encontraron errores durante el parseo.");
+			}
+		}
+
+		public static void showMessage(StringBuilder t, String msj) {
+			
+			if (band) {
+			 	//System.out.printf("\t%-20s %s\n\n", "LEXEMA", "TOKEN");
+			 	band = false;
+			}
+			//System.out.printf("\t%-20s %s\n", t, msj);
+		}
+	}
+
+PARSER_END(ETU)
+
+//	Lexemas que va a ignorar el analizador léxico.
+SKIP:{
+
+	  " "
+	| "\t"
+	| "\n"
+	| "\r"
+}
+
+//	Comentarios multilinea
+SKIP : {
+	  "/*" : DentroComentario2
+}
+<DentroComentario2> MORE : {
+	<~[]>
+}
+<DentroComentario2> SKIP:{
+	  "*/" : DEFAULT
+}
+
+//	Palabras Reservadas
+TOKEN : {
+
+	  <PR_INICIO: "inicio">				{ ETU.showMessage( image, "PALABRA_RESERVADA_INICIO" ); }
+	| <PR_SI: "si">						{ ETU.showMessage( image, "PALABRA_RESERVADA_SI" ); }
+	| <PR_PARA: "para">					{ ETU.showMessage( image, "PALABRA_RESERVADA_PARA" ); }
+	| <PR_MIENTRAS: "mientras">			{ ETU.showMessage( image, "PALABRA_RESERVADA_MIENTRAS" ); }
+	| <PR_SINO: "sino">					{ ETU.showMessage( image, "PALABRA_RESERVADA_SINO" ); }
+	| <PR_IMPRIMIR: "imprimir">			{ ETU.showMessage( image, "PALABRA_RESERVADA_IMPRIMIR" ); }
+	| <PR_ROMPER: "romper">				{ ETU.showMessage( image, "PALABRA_RESERVADA_ROMPER" ); }
+	| <PR_REGRESAR: "regresar">			{ ETU.showMessage( image, "PALABRA_RESERVADA_REGRESAR"); }
+	| <PR_LEER: "leer">					{ ETU.showMessage( image, "PALABRA_RESERVADA_LEER" ); }
+	| <PR_HACER: "hacer">				{ ETU.showMessage( image, "PALABRA_RESERVADA_HACER"); }
+}
+
+//	Delimitadores
+TOKEN : {
+
+	  <DEL_PUNTOYCOMA: ";">				{ ETU.showMessage( image, "DELIMITADOR_PUNTO_COMA" ); }
+	| <DEL_LLAVE_ABRE: "{">				{ ETU.showMessage( image, "DELIMITADOR_LLAVE_ABRE" ); }
+	| <DEL_LLAVE_CIERRA: "}">			{ ETU.showMessage( image, "DELIMITADOR_LLAVE_CIERRA" ); }
+	| <DEL_PARENTESIS_ABRE: "(">		{ ETU.showMessage( image, "DELIMITADOR_PARENTESIS_ABRE" ); }
+	| <DEL_PARENTESIS_CIERRA: ")">		{ ETU.showMessage( image, "DELIMITADOR_PARENTESIS_CIERRA" ); }
+	| <DEL_COMA: ",">					{ ETU.showMessage( image, "DELIMITADOR_COMA" ); }
+	| <DEL_DOSPUNTOS: ":">				{ ETU.showMessage( image, "DELIMITADOR_DOSPUNTOS" ); }
+	| <DEL_GATO : "#">
+	| <DEL_QUE : "¿">
+	| <DEL_QUEE : "?">				
+
+}
+
+//	Operadores
+TOKEN : {
+
+	  <OP_ADD: "+">						{ ETU.showMessage( image, "OPERADOR_ADD" ); }
+	| <OP_SUB: "-">						{ ETU.showMessage( image, "OPERADOR_SUB" ); }
+	| <OP_MUL: "*">						{ ETU.showMessage( image, "OPERADOR_MUL" ); }
+	| <OP_DIV: "/">						{ ETU.showMessage( image, "OPERADOR_DIV" ); }
+	| <OP_MOD: "%">						{ ETU.showMessage( image, "OPERADOR_MOD" ); }
+	| <OP_ASIG: "=">					{ ETU.showMessage( image, "OPERADOR_ASIG" ); }
+	| <OP_PESO: "$">					{ ETU.showMessage( image, "OPERADOR_PESO" ); }
+
+	| <OP_POT: "^">						{ ETU.showMessage( image, "OPERADOR_POT" ); }
+	| <OP_MENOR: "<">					{ ETU.showMessage( image, "OPERADOR_MENOR" ); }
+	| <OP_MAYOR: ">">					{ ETU.showMessage( image, "OPERADOR_MAYOR" ); }
+	| <OP_MENOR_IGUAL: "<=">			{ ETU.showMessage( image, "OPERADOR_MENOR_IGUAL" ); }
+	| <OP_MAYOR_IGUAL: ">=">			{ ETU.showMessage( image, "OPERADOR_MAYOR_IGUAL" ); }
+	| <OP_IGUAL: "==">					{ ETU.showMessage( image, "OPERADOR_IGUAL" ); }
+	| <OP_DIF: "!=">					{ ETU.showMessage( image, "OPERADOR_DIF" ); }
+
+	| <OP_AND: "&&">					{ ETU.showMessage( image, "OPERADOR_AND" ); }
+	| <OP_OR: "||">						{ ETU.showMessage( image, "OPERADOR_OR" ); }
+	| <OP_NEG: "!">						{ ETU.showMessage( image, "OPERADOR_NEG" ); }
+
+	| <OP_INC: "++">					{ ETU.showMessage( image, "OPERADOR_INC" ); }
+	| <OP_DEC: "--">					{ ETU.showMessage( image, "OPERADOR_DEC" ); }
+
+}
+
+//	Tipos
+TOKEN : {
+
+	  <T_CADENA: "cadena">				{ ETU.showMessage( image, "TIPO_CADENA" ); }
+	| <T_ENT: "ent">					{ ETU.showMessage( image, "TIPO_ENT" ); }
+	| <T_DEC: "dec">					{ ETU.showMessage( image, "TIPO_DEC" ); }
+	| <T_VF: "vf">						{ ETU.showMessage( image, "TIPO_VF" ); }
+
+}
+
+//	Valores 
+TOKEN : {
+
+	  <VAL_CADENA: ( "\"")(~["\""])*("\"")>									{ ETU.showMessage( image, "VALOR_CADENA" ); }
+	| <VAL_ENT: ("-")? (["0"-"9"])+>										{ ETU.showMessage( image, "VALOR_ENTERO" ); }
+	| <VAL_DEC: ("-")? (<VAL_ENT>)*(".")(<VAL_ENT>)+>						{ ETU.showMessage( image, "VALOR_DECIMAL" ); }
+	| <VAL_VF: ("true" | "false")>											{ ETU.showMessage( image, "VALOR_VERDADEROFALSO" ); }
+	| <ID: (["a"-"z", "A"-"Z"])(["a"-"z", "A"-"Z","0"-"9", "_", "$"])*>		{ ETU.showMessage( image, "IDENTIFICADOR" ); }
+	
+}
+
+//	Caracteres no validos
+TOKEN : {
+	<NO_VALIDO: ~[]>														{ ETU.showMessage( image, "*CARACTER NO VALIDO*\n"); }
+}
+
+//	Declaracion gramaticas
+void start() : {} 
+{
+	try{
+		(
+			<PR_INICIO> nombre()"{" instruccion() "}" <EOF>
+		)
+	}
+		
+	catch(ParseException pe){
+		System.out.println("Error en la declaracion:   \n \t" + pe.getMessage()) ;
+		Token t;
+		do {
+						t = getNextToken();
+		} while (t.kind != ETUTokenManager.EOF);
+	}
+
+}
+
+void nombre() :{}
+{
+	(
+		<ID>
+	)
+}
+
+void instruccion() : {} 
+{
+	(
+		  declaracion()
+		| condicional()
+		| ciclo()
+		| io()
+//		| actualizacion2()
+	)*
+}
+
+void declaracion() : {} 
+{
+	try{
+		(
+			  LOOKAHEAD(5)declaracion_ni()
+		 	| LOOKAHEAD(5)declaracion_i()
+		)
+	}
+		
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico declaracion: \n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != ")" || t.image != "." || t.image != "}");
+	}
+}
+
+
+void declaracion_ni() : {} 
+{
+	try{
+		(
+			tipo() nombre() ";"
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico declaracion no inicializada: \n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != ")" || t.image != ";" || t.image != "}");
+	}	
+}
+
+void declaracion_i() : {} 
+{
+	try{
+		(
+			tipo() nombre() <OP_ASIG> valor() ";"
+			| nombre() <OP_ASIG> (expresion())* ";" 
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico declaracion inicializada: \n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != ")" || t.image != "." || t.image != "}");
+	}
+	
+}
+
+void tipo() : {} 
+{
+	(
+		  <T_CADENA>
+		| <T_ENT>
+		| <T_VF>
+		| <T_DEC>
+	)
+}
+
+void valor() : {} 
+{
+	try{
+		(
+			  <VAL_CADENA>
+			| <VAL_VF>
+			| expresion()
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico valor invalido: \nDetalles:\n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != ")" || t.image != "." || t.image != "}");
+	}
+}
+
+void expresion() : {} 
+{
+
+	(
+		  LOOKAHEAD(3)termino() "+" expresion() 
+	 	| LOOKAHEAD(3)termino() "-" expresion() 
+	 	| LOOKAHEAD(3)termino()
+	)
+
+}
+
+void termino() : {} 
+{
+	(     
+		   LOOKAHEAD(3)factor() "*" termino()
+		 | LOOKAHEAD(3)factor() "/" termino()
+		 | LOOKAHEAD(3)factor()
+	)
+}
+
+void factor() : {} 
+{
+	try{
+		(
+			  "(" expresion() ")"
+		  	| nombre()
+		  	| <VAL_ENT>
+		  	| <VAL_DEC>
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico en la expresion aritmetica: \nDetalles:\n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != ")" || t.image != ";" || t.image != "}");
+	}
+}
+
+void condicional() : {} 
+{
+	try{
+		(
+			  LOOKAHEAD(11)pif()
+			| LOOKAHEAD(11)pif_else()
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico en sentencias condicionales: \nDetalles:\n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != "}");
+	}
+}
+
+void pif() : {} 
+{
+	try{
+		(
+			<PR_SI> "(" condicion() ")"  instruccion()  
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("Hubo un error sintactico sentencia if: \n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while ( t.image != "}");
+		condicional();
+	}
+
+	
+}
+
+void pif_else() : {} 
+{
+	try{
+		(
+			<PR_SI> "(" condicion() ")" instruccion() <PR_SINO>  instruccion()
+			| <PR_SINO> instruccion()  
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("Hubo un error sintactico sentencia if-else: \n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while ( t.image != "}");
+		condicional();
+	}
+}
+
+void condicion() : {} 
+{
+	try{
+		(
+			  expresion() op_log() expresion()
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico en condicion: \nDetalles:\n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != ")");
+	}
+}
+
+void op_log() : {} 
+{
+	(
+		  "<"
+		| "<="
+		| ">="
+		| ">"
+		| "=="
+	)
+}
+
+void ciclo() : {} 
+{
+	try{
+		(
+			  pwhile()
+			| pdo_while()
+			| pfor()
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico en ciclos: \nDetalles:\n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != "}" || t.image != ";");
+	}
+
+
+}
+
+void pwhile() : {} 
+{
+	try{
+		(
+			  <PR_MIENTRAS> "(" condicion() ")" "{" instruccion() "}" 
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sintactico en while: \nDetalles:\n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != "}");
+	}
+}
+
+void pdo_while() : {} 
+{
+	try{
+		(
+			  <PR_HACER> "{"instruccion() "}"<PR_MIENTRAS> "(" condicion() ")" ";"
+		)
+	}
+	catch(ParseException pe){
+		System.out.println("\nHubo un error sint\u00E1ctico en do-while: \nDetalles:\n\t" + pe.getMessage());
+		Token t;
+		do {
+			t = getNextToken();
+		} while (t.image != ";");
+	}
+
+}
+
+void pfor() : {} 
+{
+	(
+		<PR_PARA>  "(" declaracion_i() ";"condicion()";" actualizacion() ")" instruccion() 
+		 
+	)
+}
+
+void actualizacion() : {} 
+{
+	(
+		  LOOKAHEAD(2)nombre() <OP_INC>
+		| LOOKAHEAD(2)nombre() <OP_DEC>
+		 
+	)
+}
+
+void actualizacion2() : {} 
+{
+	(
+		  LOOKAHEAD(3)nombre() <OP_INC> ";"
+		| LOOKAHEAD(3)nombre() <OP_DEC> ";"
+	)
+}
+
+void io() : {} 
+{
+	(
+		   imprimir()
+		 | leer()
+	)
+}
+
+void imprimir() : {} 
+{
+	(
+		//  LOOKAHEAD(7)<PR_IMPRIMIR> "(" <VAL_CADENA> "+" nombre() ")" ";"
+		<PR_IMPRIMIR> "(" <VAL_CADENA>  ( "+" nombre() )* ")" ";"
+	)
+}
+
+void leer() : {} 
+{
+	(
+		<PR_LEER> "(" tipo() "," nombre() ")" ";"
+	)
+}

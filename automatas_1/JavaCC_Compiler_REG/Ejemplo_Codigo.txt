@@ -1,0 +1,24 @@
+Programa $suma1 
+{
+	int $edad = $i;
+	string $nombre;
+
+	if#$n>7#{
+		readln(int, $numero);
+	}
+
+	do¿
+		string $nombre = "jeje";
+		$n++;
+	?while($n < 10);
+
+
+
+	while($x == $cadena){
+
+		println("Hola mundo.");
+	}
+
+
+}
+	

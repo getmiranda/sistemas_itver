@@ -1,0 +1,289 @@
+options {
+
+}
+
+PARSER_BEGIN( MCVillCompiler )
+
+	//Librerias
+	import java.io.IOException;
+	import java.util.ArrayList;
+
+	//Clase que ejecuta el parser
+	public class MCVillCompiler {
+
+		private static FileManager file = new FileManager();
+		private static FileManager file2 = new FileManager();
+		private static FileManager file3 = new FileManager();
+		private static IOManager iom = new IOManager(file, file2, file3);
+		private static SemanticManager sm = new SemanticManager();
+		private static ArrayList<Token> listValues = new ArrayList<Token>();
+		private static boolean band = true;
+
+		public static void main( String[] MCVillArgs ) {
+
+			//Declaracion del analizador léxico
+			MCVillCompiler lex;
+			
+
+			//Si el usuario escribe en la consola
+			if ( MCVillArgs.length == 0 ) {
+				System.out.println( "MCVill:> Leyendo de entrada estandar...\n" );
+				lex = new MCVillCompiler( System.in );
+			}
+
+			//Si el usuario le pasa un archivo para analizar
+			else if ( MCVillArgs.length == 1 ) {
+				System.out.println( "MCVill:> Leyendo de fichero " + MCVillArgs[0] + " ...\n" );
+
+				try {
+					lex = new MCVillCompiler( new java.io.FileInputStream( MCVillArgs[0] ) );
+				} catch( java.io.FileNotFoundException e ) {
+					System.out.println( "MCVill:> El fichero " + MCVillArgs[0] + " no ha sido encontrado." );
+					return;
+				}
+			}
+
+			//Si el usuario no sabe usarlo
+			else {
+				System.out.println ("MCVill:> Debes utilizarlo de una de las siguientes formas:");
+				System.out.println ("         java MCVill < fichero");
+				System.out.println ("Or");
+				System.out.println ("         java MCVill fichero");
+				return;
+			}
+
+			//Ejecucion del Analizador
+			try{
+				file.crearFile("out\\MCVill_lexical_Output.txt");
+				file2.crearFile("out\\MCVill_Syntax_Output.txt");
+				file3.crearFile("out\\MCVill_Semantic_Output.txt");
+				lex.start();
+				System.out.println( "\nMCVill:> La entrada ha sido leida con exito.");
+				file.cerrarFile();
+				file2.cerrarFile();
+				file3.cerrarFile();
+			}
+
+			catch(TokenMgrError e){
+				System.out.println( "\nMCVill:> Ha ocurrido un error lexico.");
+				System.out.println( "Detalles: " + e.getMessage());
+			}
+			catch(ParseException pe){
+				iom.errorSyntax(pe);
+				Token t = getToken(0);
+				while(t.image == "\n"){
+					t = getNextToken();
+				}
+			}
+		}
+	}
+
+PARSER_END(MCVillCompiler)
+
+//*****************************************************LEXICAL***************************************************************
+
+//IGNORAR
+SKIP : {
+	   " "
+	|  "\t"
+	//|  "\n"
+	|  "\r"
+	//|  <"rem" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+}
+
+//COMENTARIOS
+SKIP : {
+	  "=begin" : COMENTARIO
+	| "#" : COMENTARIO
+	//| <CAD_NO_VALID: ("&"|"ñ"|"º"|"$"|"^"|"("|")"|":"|"["|"]")+> { IOManager.showMessage(image, "Caracter no valido."); }  : COMENTARIO
+
+}
+<COMENTARIO> SKIP : {
+	"=end" : DEFAULT
+	| "\n" : DEFAULT
+}
+<COMENTARIO> MORE : {
+	<~[]>
+}
+
+//SIMBOLOGIA
+TOKEN:{
+	  <S_SUMA:"+"> 				{ IOManager.showMessage(image, "Simbolo Mas "); } 
+	| <S_MULTIPLICA:"*"> 		{ IOManager.showMessage(image, "Simbolo Multiplica "); } 
+  	| <S_LLAVE_A:"{"> 			{ IOManager.showMessage(image, "Simbolo llave abre  "); } 
+	| <S_LLAVE_C:"}"> 			{ IOManager.showMessage(image, "Simbolo llave cierra "); } 
+	| <S_PUNTO:"."> 			{ IOManager.showMessage(image, "Simbolo punto "); } 
+	| <S_CORCHETE_A:"["> 		{ IOManager.showMessage(image, "Simbolo corchete abre "); } 
+	| <S_CORCHETE_C:"]"> 		{ IOManager.showMessage(image, "Simbolo corchete cierra "); } 
+	| <S_PAREN_A:"("> 			{ IOManager.showMessage(image, "Simbolo parentesis abre "); } 
+	| <S_PAREN_C:")"> 			{ IOManager.showMessage(image, "Simbolo parentesis cierra "); } 
+	| <S_COMA:","> 				{ IOManager.showMessage(image, "Simbolo delimitador coma"); } 
+	| <S_PUNTO_COMA:";"> 		{ IOManager.showMessage(image, "Simbolo delimitador punto y coma "); } 
+
+	| <OA_RESTA:"-"> 			{ IOManager.showMessage(image, "Simbolo resta "); } 
+	| <OA_DIVICION:"/"> 		{ IOManager.showMessage(image, "Simbolo  divicion "); } 
+	| <OA_POTENCIA:"**"> 		{ IOManager.showMessage(image, "Simbolo potencia "); } 
+	| <OA_MOD_DIV:"%"> 			{ IOManager.showMessage(image, "Simbolo modulo de divicion "); } 
+
+	| <OC_IGUAL_QUE:"=="> 		{ IOManager.showMessage(image, "Simbolo igualdad "); } 
+	| <OC_DIFERENTE_DE:"!="> 	{ IOManager.showMessage(image, "Simbolo diferente de "); } 
+	| <OC_MENOR_QUE:"<"> 		{ IOManager.showMessage(image, "Simbolo Menor que "); } 
+	| <OC_MAYOR_QUE:">"> 		{ IOManager.showMessage(image, "Simbolo Mayor que "); } 
+	| <OC_MENOR_O_IGUAL:"<="> 	{ IOManager.showMessage(image, "Simbolo menor o igual "); } 
+	| <OC_MAYOR_O_IGUAL:">="> 	{ IOManager.showMessage(image, "Simbolo Maor o igual "); } 
+	| <OC_IGUALDAD_WHEN:"==="> 	{ IOManager.showMessage(image, "Simbolo igualdad sentencia when "); } 
+	| <OC_COMBINADO:"<=>">		{ IOManager.showMessage(image, "Simbolo comparador combinado "); } 
+	| <OC_QUESTION:"?"> 		{ IOManager.showMessage(image, "Simbolo pregunta "); } 
+
+	| <OAS_ASIGNA:"="> 			{ IOManager.showMessage(image, "Simbolo de asignacion "); } 
+
+	| <ORA_RANGO:".."> 			{ IOManager.showMessage(image, "Simbolo de rango "); } 
+	| <ORA_RANGO1:"..."> 		{ IOManager.showMessage(image, "Simbolo de Rango "); } 
+
+	| <OL_AND:"&&"> 			{ IOManager.showMessage(image, "Simbolo and "); } 
+	| <OL_OR:"||"> 				{ IOManager.showMessage(image, "Simbolo or "); } 
+	| <OL_NOT:"!"> 				{ IOManager.showMessage(image, "Simbolo not "); } 
+}
+
+//VALORES Y TIPOS
+TOKEN:{
+	  <VAL_CADENA: ( "\"")(~["\""])*("\"")> 									{ IOManager.showMessage(image, "Valor cadena"); } 
+	| <VAL_CADENA2: ("\'")(~["\'"])*("\'")> 									{ IOManager.showMessage(image, "Valor cadena"); } 
+	| <VAL_ENTERO: ("-")? (["0"-"9"])+> 										{ IOManager.showMessage(image, "Valor entero"); } 
+	| <VAL_DECIMAL: ("-")? (<VAL_ENTERO>)*(".")(<VAL_ENTERO>)+> 				{ IOManager.showMessage(image, "Valor decimal"); } 
+	| <ID_LOCAL: ("_")?(["a"-"z", "A"-"Z"])(["a"-"z", "A"-"Z","0"-"9", "_"])*> 	{ IOManager.showMessage(image, "ID local"); } 
+	| <ID_INSTANCE: ("@")(<ID_LOCAL>)+> 										{ IOManager.showMessage(image, "ID instancia"); } 
+	| <ID_CLASS: ("@@")(<ID_LOCAL>)+> 											{ IOManager.showMessage(image, "ID class"); } 
+	| <ID_GLOBAL: ("$")(<ID_LOCAL>)+> 											{ IOManager.showMessage(image, "ID global"); } 
+	| <ID_BLOCK: ("&")(<ID_LOCAL>)+> 											{ IOManager.showMessage(image, "ID block"); } 
+	| <ID_CONSTANT: (["A"-"Z"])+> 												{ IOManager.showMessage(image, "ID constante"); } 
+	| <S_SALTO: ("\n")+> 														{ }
+}
+
+//GRAMÁTICAS
+void start():{}{
+	program()
+}
+//************************************* PROGRAMA *************************************************
+void program():{}{
+	(
+		declara() <S_SALTO>
+	)* <EOF>
+}
+
+//************************************* DECLARACIONES ***************************************
+void declara(): {
+	Token id;
+	String type = null;
+}
+{
+	try {
+
+		( id = varname()		
+			<OAS_ASIGNA> 
+			( 
+				valor()			{ for( int i = 0; i < listValues.size(); i++ ) 
+								  {
+									for (int j = 0; j < listValues.size(); j++ ) 
+									{
+										type = sm.compareTypes( listValues.get( i ), listValues.get( j ) );
+									}
+								  }
+								  sm.addVariable( id, type );
+								  listValues.clear();
+                                }
+                                
+			)					
+		) 					
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+		/*Token t;
+		do {
+			t = getNextToken();
+			System.out.println(t.image);
+		} while ( t.kind != MCVillCompilerTokenManager.EOF || t.image != "\n");*/
+		/*Token t = getToken(0);
+		System.out.println(t.image);
+		while(t.image != "\n"){
+			t = getNextToken();
+			//System.out.println(t.image);
+
+		}*/
+	}
+	catch (SemanticException se){
+		iom.errorSemantic(se);
+		/*Token t;
+		do {
+			t = getToken(0);
+			System.out.println(t.image);
+		} while ( t.kind != MCVillCompilerTokenManager.EOF);*/
+		/*
+		Token t = getToken(0);
+		System.out.println(t.image);
+		while(t.image == "\n"){
+			t = getNextToken();
+			System.out.println(t.image);
+		}*/
+	}
+}
+
+
+//************************************** VALORES *****************************************************
+void valor()throws SemanticException:{}
+{
+	( 
+		expr() 
+		(op_arit() expr())*
+	)
+}
+
+//**************************************** EXPRESIONES ***************************************
+
+void expr():{ 
+	Token id;
+}
+{
+	try{
+		( 												   //"b"
+			  id = <ID_LOCAL>			{ 
+		  								  sm.checkVariable( id );
+		  								  listValues.add( id ); 
+										}  
+			| id = <VAL_ENTERO>			{ listValues.add( id ); }
+			| id = <VAL_CADENA>			{ listValues.add( id ); }
+			| id = <VAL_DECIMAL>		{ listValues.add( id ); }
+			| id = <VAL_CADENA2>		{ listValues.add( id ); }
+			| "(" valor() ")"
+		)
+
+	}
+	catch (ParseException e) {
+		iom.errorSyntax(e);
+	}
+	catch (SemanticException se){
+		iom.errorSemantic(se);
+	}
+}
+
+
+//**************************************** OPERADORES ARITMETICOS ***************************************
+
+void op_arit():{}{
+("-" | "+" | "*" | "/" | "%" | "**" )
+}
+
+//**************************************** VARIABLES ***************************************
+Token varname():{
+	Token id;
+}
+{
+	( 	  
+		  LOOKAHEAD(5) id = <ID_LOCAL>
+		| LOOKAHEAD(5) id = <ID_CONSTANT> 
+		| LOOKAHEAD(5) id = <ID_GLOBAL> 
+		| LOOKAHEAD(5) id = <ID_CLASS> 
+		| id = <ID_INSTANCE> 
+	)
+	{ return id; }
+}

@@ -1,0 +1,5 @@
+inicio miranda{
+	mientras(n<=10){
+		imprimir("Hola");
+	}
+}

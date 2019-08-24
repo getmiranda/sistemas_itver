@@ -1,0 +1,12 @@
+1. Dirigirse a la ruta donde estan los archivos
+   Ejemplo: cd C:\Compiladores\REG
+
+2. Metacompilar el archivo .jj
+   javacc REGCompiler.jj
+
+3. Compilar todos los archivos .java
+   javac *.java
+
+4. Ejecutar el analizador, hay dos maneras:
+   a) java REG Ejemplo_Codigo.txt
+   b) java REG [ENTER]
